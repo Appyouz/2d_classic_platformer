@@ -1,4 +1,3 @@
-
 #include <SDL2/SDL.h>
 #include <iostream>
 
@@ -36,7 +35,7 @@ int main() {
   int playerSpeedX{10};
   int playerSpeedY{0};
   bool isJumping{false};
-  int jumpForce{30};
+  int jumpForce{20};
   int gravity{1};
 
   bool gameIsRunning{true};
@@ -71,7 +70,7 @@ int main() {
       playerSpeedY += gravity;
     }
 
-    playerSpeedY += 1;
+    // playerSpeedY += 1;
     // Apply vertical speed
     player.y += playerSpeedY;
 
