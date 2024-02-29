@@ -1,17 +1,19 @@
+
 #include <SDL2/SDL.h>
 #include <iostream>
+
 constexpr int SCREEN_WIDTH{800};
 constexpr int SCREEN_HEIGHT{600};
+
 int main() {
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cerr << "SDL Video failed to load: " << SDL_GetError() << '\n';
     return 1;
-  } else {
-    std::cout << "SDL Video is ready.\n";
+  }else {
+    std::cout << "SDL Video is ready to go.\n";
   }
 
-  SDL_Window *window{nullptr};
-  window = SDL_CreateWindow("2d classic platformer", SDL_WINDOWPOS_UNDEFINED,
+  SDL_Window *window = SDL_CreateWindow("2d classic platformer", SDL_WINDOWPOS_UNDEFINED,
                             SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH,
                             SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 
@@ -21,8 +23,7 @@ int main() {
     return 1;
   }
 
-  SDL_Renderer *renderer{nullptr};
-  renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
   if (renderer == nullptr) {
     std::cerr << "Failed to create renderer: " << SDL_GetError() << '\n';
@@ -34,75 +35,82 @@ int main() {
   SDL_Rect player{100, 100, 50, 50};
   int playerSpeedX{10};
   int playerSpeedY{0};
-
   bool isJumping{false};
-  int jumpForce{20};
+  int jumpForce{30};
   int gravity{1};
 
   bool gameIsRunning{true};
   while (gameIsRunning) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-      const Uint8 *state{SDL_GetKeyboardState(NULL)};
+      const Uint8 *state = SDL_GetKeyboardState(NULL);
       if (event.type == SDL_QUIT || state[SDL_SCANCODE_ESCAPE]) {
         gameIsRunning = false;
-        std::cout << "Escapy key pressed.\n";
+        std::cout<< "Escape key is pressed.\n";
       }
 
-      // up
-      if (state[SDL_SCANCODE_W]) {
+      // Jump
+      if (state[SDL_SCANCODE_W] && !isJumping) {
         isJumping = true;
+        playerSpeedY = -jumpForce;
       }
-      // down
-      if (state[SDL_SCANCODE_S]) {
-        player.y += playerSpeedY;
-      }
-      // left
+
+      // Move left
       if (state[SDL_SCANCODE_A]) {
         player.x -= playerSpeedX;
       }
-      // right
+
+      // Move right
       if (state[SDL_SCANCODE_D]) {
         player.x += playerSpeedX;
       }
-      if (isJumping) {
-        player.y -= jumpForce;
-        jumpForce -= gravity;
-      }
-      if (jumpForce < 0) {
-        isJumping = false;
-        jumpForce = 20;
-      }
+    }
+
+    // Apply gravity
+    if (isJumping) {
+      playerSpeedY += gravity;
     }
 
     playerSpeedY += 1;
+    // Apply vertical speed
     player.y += playerSpeedY;
+
+
+
+    // Land on the ground
     if (player.y + player.h >= SCREEN_HEIGHT) {
-      player.y =
-          SCREEN_HEIGHT - player.h; // Set player's position to the ground level
-      playerSpeedY = 0; // Reset vertical speed when player hits the ground
+      player.y = SCREEN_HEIGHT - player.h;
+      playerSpeedY = 0;
+      isJumping = false;
     }
 
-    // check right boundary collision detection and resolution
-    if (player.x + player.w >= SCREEN_WIDTH) {
-      player.x = SCREEN_WIDTH - player.w;
-      // playerSpeedX = 0;
-    }
-    // check left boundary collision detection and resolution
-    if (player.x <= 0) {
+    // Check for collision with screen boundaries
+    if (player.x < 0) {
       player.x = 0;
+    } else if (player.x + player.w > SCREEN_WIDTH) {
+      player.x = SCREEN_WIDTH - player.w;
     }
+
+    // Clear the screen
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
 
+    // Draw the player
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
     SDL_RenderFillRect(renderer, &player);
 
+    // Present the frame
     SDL_RenderPresent(renderer);
+
+    // Delay to control frame rate
+    SDL_Delay(10);
   }
-  // clean up
+
+  // Clean up
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
+
   return 0;
 }
+
