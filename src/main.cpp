@@ -36,12 +36,11 @@ int main() {
     }
 
     SDL_Rect player{100, 100, 50, 50};
-    int playerSpeedX{10};
-    int playerSpeedY{0};
+    int playerSpeedX{0}; // Horizontal speed
+    int playerSpeedY{0}; // Vertical speed
     bool isJumping{false};
     int jumpForce{20};
     int gravity{1};
-    int acceleration{30};
     bool gameIsRunning{true};
 
     Uint32 previousTime = SDL_GetTicks();
@@ -55,32 +54,37 @@ int main() {
 
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            const Uint8 *state = SDL_GetKeyboardState(NULL);
-            if (event.type == SDL_QUIT || state[SDL_SCANCODE_ESCAPE]) {
+            if (event.type == SDL_QUIT) {
                 gameIsRunning = false;
                 std::cout << "Escape key is pressed.\n";
-            }
-
-            bool keyIsPressed_W = state[SDL_SCANCODE_W];
-            bool keyIsPressed_A = state[SDL_SCANCODE_A];
-            bool keyIsPressed_D = state[SDL_SCANCODE_D];
-
-            if (keyIsPressed_W && !isJumping) {
-                isJumping = true;
-                playerSpeedY = -jumpForce;
-            }
-
-            if (keyIsPressed_A) {
-                player.x -= playerSpeedX;
-                if (isJumping) {
-                    player.x -= acceleration;
+            } else if (event.type == SDL_KEYDOWN) {
+                switch (event.key.keysym.sym) {
+                    case SDLK_ESCAPE:
+                        gameIsRunning = false;
+                        std::cout << "Escape key is pressed.\n";
+                        break;
+                    case SDLK_w:
+                        if (!isJumping) {
+                            isJumping = true;
+                            playerSpeedY = -jumpForce;
+                        }
+                        break;
+                    case SDLK_a:
+                        playerSpeedX = -5; // Move left
+                        break;
+                    case SDLK_d:
+                        playerSpeedX = 5; // Move right
+                        break;
                 }
-            }
-
-            if (keyIsPressed_D) {
-                player.x += playerSpeedX;
-                if (isJumping) {
-                    player.x += acceleration;
+            } else if (event.type == SDL_KEYUP) {
+                switch (event.key.keysym.sym) {
+                    case SDLK_w:
+                        // Handle key release if needed
+                        break;
+                    case SDLK_a:
+                    case SDLK_d:
+                        playerSpeedX = 0; // Stop horizontal movement
+                        break;
                 }
             }
         }
@@ -100,6 +104,9 @@ int main() {
                 playerSpeedY = 0;
                 isJumping = false;
             }
+
+            // Apply horizontal speed
+            player.x += playerSpeedX;
 
             // Check for collision with screen boundaries
             if (player.x < 0) {
