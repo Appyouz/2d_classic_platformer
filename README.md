@@ -35,7 +35,7 @@ Feel free to customize the game as needed. You can adjust various parameters suc
 
 ## Credits
 
-This project was created by [Your Name]. It is intended for educational purposes and to serve as a starting point for building 2D platformer games using SDL.
+This project was created by [Appyouz]. It is intended for educational purposes and to serve as a starting point for building 2D platformer games using SDL.
 
 ## License
 
